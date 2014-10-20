@@ -1,0 +1,24 @@
+{
+  "name": "nodejs-simpleRest",
+  "version": "1.0.0",
+  "description": "simpleRest",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://bennetto@github.com/bennetto/nodejs-simpleRest.git"
+  },
+  "author": "bennetto",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bennetto/nodejs-simpleRest/issues"
+  },
+  "homepage": "https://github.com/bennetto/nodejs-simpleRest",
+  "dependencies": {
+    "body-parser": "^1.9.0",
+    "express": "^4.9.8",
+    "mongoose": "^3.8.17"
+  }
+}
