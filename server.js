@@ -28,7 +28,8 @@ var router = express.Router(); 				// get an instance of the express Router
 // middleware to use for all requests
 router.use(function(req, res, next) {
     // do logging
-    console.log('Something is happening.');
+    console.log('');
+    console.log('/* request begin */');
     next(); // make sure we go to the next routes and don't stop here
 });
 
@@ -42,7 +43,7 @@ router.route('/bears')
 
     // create a bear (accessed at POST http://localhost:8080/api/bears)
     .post(function(req, res) {
-
+        console.log('post bear');
         var bear = new Bear(); 		// create a new instance of the Bear model
         bear.name = req.body.name;  // set the bears name (comes from the request)
 
@@ -57,6 +58,7 @@ router.route('/bears')
     })
 // get all the bears (accessed at GET http://localhost:8080/api/bears)
     .get(function(req, res) {
+        console.log('get all bears');
         Bear.find(function(err, bears) {
             if (err)
                 res.send(err);
@@ -71,6 +73,7 @@ router.route('/bears/:bear_id')
 
     // get the bear with that id (accessed at GET http://localhost:8080/api/bears/:bear_id)
     .get(function(req, res) {
+        console.log('get bear : ',req.params.bear_id);
         console.log('bear_id');
         Bear.findById(req.params.bear_id, function(err, bear) {
             if (err)
@@ -80,7 +83,7 @@ router.route('/bears/:bear_id')
     })
 // update the bear with this id (accessed at PUT http://localhost:8080/api/bears/:bear_id)
     .put(function(req, res) {
-
+        console.log('put bear : ',req.params.bear_id);
         // use our bear model to find the bear we want
         Bear.findById(req.params.bear_id, function(err, bear) {
 
@@ -101,6 +104,7 @@ router.route('/bears/:bear_id')
     })
 // delete the bear with this id (accessed at DELETE http://localhost:8080/api/bears/:bear_id)
     .delete(function(req, res) {
+        console.log('delete bear : ',req.params.bear_id);
         Bear.remove({
             _id: req.params.bear_id
         }, function(err, bear) {
