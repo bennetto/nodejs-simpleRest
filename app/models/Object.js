@@ -14,7 +14,7 @@ var _self = this;
  */
 
 
-function createObject(param) {
+function createObject(params) {
     /**
      * Schema
      */
@@ -28,8 +28,8 @@ function createObject(param) {
    // var schema = new Schema({ name: String });
     //var Model = mongoose.model('Page', schema);
 
-    __logger.info('createObject model',param.name);
-    Model = exports.model = mongoose.model("bear", objectSchema);
+    __logger.info('createObject model',params.name);
+    Model = exports.model = mongoose.model(params.name, objectSchema);
     return exports;
 };
 exports = module.exports = createObject;
@@ -42,7 +42,7 @@ exports.toString = function(){
     return "MDR";
 }
 
-exports.post = function(params) {
+exports.post = function(params,callback) {
     var res;
     __logger.info('post bear');
     var model = new Model(); 		// create a new instance of the Bear model
@@ -53,9 +53,10 @@ exports.post = function(params) {
         if (err){
             res = err;
         }else{
+            __logger.info('Bear created!');
             res = { message: 'Bear created!' };
         }
-        return res;
+        callback(res);
     });
 };
 
@@ -67,13 +68,12 @@ exports.getAll = function(params,callback) {
             res = err;
         }else{
             res = bear;
-            __logger.info('getAll res : ');
         }
         callback(res);
     });
 };
 
-exports.get = function(params) {
+exports.get = function(params,callback) {
     __logger.info('get bear : ',params.id);
     Model.findById(params.id, function(err, bear) {
         if (err){
@@ -81,36 +81,37 @@ exports.get = function(params) {
         }else{
             res = bear;
         }
-        return res;
+        callback(res);
     });
 };
 
-exports.put = function(params) {
-    __logger.info('put bear : ',params.id);
+exports.put = function(params,callback) {
+    __logger.info('put bear : ',params.id," : ",params.name);
         // use our bear model to find the bear we want
     Model.findById(params.id, function(err, bear) {
 
         if (err){
             res = err;
-            return res;
-        }
-
+            callback(res);
+        }else {
+            __logger.info('find');
             bear.name = params.name; 	// update the bears info
-
+            __logger.info('change name done');
             // save the bear
-            bear.save(function(err) {
-                if (err){
+            bear.save(function (err) {
+                __logger.info('save done');
+                if (err) {
                     res = err;
-                }else{
+                } else {
                     res = { message: 'Bear updated!' };
                 }
-                return res;
+                callback(res);
             });
-
+        }
         });
     };
 
-exports.delete = function(params) {
+exports.delete = function(params,callback) {
     __logger.info('delete bear : ',params.id);
         Model.remove({
             _id: params.id
@@ -120,7 +121,7 @@ exports.delete = function(params) {
             }else{
                 res = { message: 'Successfully deleted' };
             }
-            return res;
+            callback(res);
         });
 };
 

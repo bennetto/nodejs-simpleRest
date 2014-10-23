@@ -22,7 +22,9 @@ mongoose.connect('mongodb://localhost:27017/simpleRest'); // connect to our data
 
 var Object = require('./app/models/Object');
 var objects = {};
-objects["bears"] = Object({params:{name:"bears"}});
+objects["bears"] = Object({name:"bears"});
+objects["beers"] = Object({name:"beers"});
+
 winston.info('objects : ',objects["bears"].toString());
 
 // ROUTES FOR OUR API
@@ -44,71 +46,42 @@ router.get('/', function(req, res) {
 
 // more routes for our API will happen here
 router.route('/:nameObject')
-    // create a bear (accessed at POST http://localhost:8080/api/bears)
+    // create
     .post(function(req, res) {
         winston.info('post bears',req.params.nameObject);
         var result = objects[req.params.nameObject].post({name:req.body.name});
         res.json(result);
     })
-// get all the bears (accessed at GET http://localhost:8080/api/bears)
+// get all
     .get(function(req, res) {
         winston.info('get all',req.params.nameObject);
-        var result = objects[req.params.nameObject].getAll(null,function(){
-            winston.info('return ',result);
+        var result = objects[req.params.nameObject].getAll(undefined,function(result){
             res.json(result);
         });
-
     });
 
 // on routes that end in /bears/:bear_id
 // ----------------------------------------------------
 router.route('/:nameObject/:bear_id')
 
-    // get the bear with that id (accessed at GET http://localhost:8080/api/bears/:bear_id)
     .get(function(req, res) {
         winston.info('get ',req.params.nameObject);
-        var result = objects[req.params.nameObject].get({id:req.params.bear_id});
-        res.json(result);
-/*
-        winston.info('get bear : ',req.params.bear_id);
-        winston.info('bear_id');
-        Bear.findById(req.params.bear_id, function(err, bear) {
-            if (err)
-                res.send(err);
-            res.json(bear);
-        });*/
-    })
-// update the bear with this id (accessed at PUT http://localhost:8080/api/bears/:bear_id)
-    .put(function(req, res) {
-        winston.info('put bear : ',req.params.bear_id);
-        // use our bear model to find the bear we want
-        Bear.findById(req.params.bear_id, function(err, bear) {
-
-            if (err)
-                res.send(err);
-
-            bear.name = req.body.name; 	// update the bears info
-
-            // save the bear
-            bear.save(function(err) {
-                if (err)
-                    res.send(err);
-
-                res.json({ message: 'Bear updated!' });
-            });
-
+        var result = objects[req.params.nameObject].get({id:req.params.bear_id},function(result){
+            res.json(result);
         });
     })
-// delete the bear with this id (accessed at DELETE http://localhost:8080/api/bears/:bear_id)
-    .delete(function(req, res) {
-        winston.info('delete bear : ',req.params.bear_id);
-        Bear.remove({
-            _id: req.params.bear_id
-        }, function(err, bear) {
-            if (err)
-                res.send(err);
 
-            res.json({ message: 'Successfully deleted' });
+    .put(function(req, res) {
+        winston.info('put ',req.params.nameObject," : ",req.params.bear_id);
+        var result = objects[req.params.nameObject].put({id:req.params.bear_id,name:req.body.name},function(result){
+            res.json(result);
+        });
+    })
+
+    .delete(function(req, res) {
+        winston.info('remove ',req.params.nameObject," : ",req.params.bear_id);
+        var result = objects[req.params.nameObject].delete({id:req.params.bear_id},function(result){
+            res.json(result);
         });
     });
 
