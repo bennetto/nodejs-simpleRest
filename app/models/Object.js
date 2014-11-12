@@ -2,127 +2,156 @@
  * REQUIRE
  */
 var mongoose = require('mongoose');
+var logger = require("../utils/logger.js");
+var Schema = mongoose.Schema;
 
-var _self = this;
-/**
- * Var
- */
+
+var method  = Object.prototype;
+function Object(params,schema) {
+
+    /*
+     Var
+     */
+    var ModelObject;
+    var _self = this;
+    var nameObject = params.name;
+    var objectSchema;
     var isExpose = true;
-    var Model;
-/**
- * Expose `createApplication()`.
- */
 
 
-function createObject(params) {
     /**
      * Schema
      */
-    __logger.info('createObject');
-    var Schema       = mongoose.Schema;
-    var objectSchema   = new Schema({
-        name: String
 
-    });
+    logger.info('createObject Model ', params.name);
 
-   // var schema = new Schema({ name: String });
-    //var Model = mongoose.model('Page', schema);
-
-    __logger.info('createObject model',params.name);
-    Model = exports.model = mongoose.model(params.name, objectSchema);
-    return exports;
-};
-exports = module.exports = createObject;
-
-
-/**
-*   Function
- */
-exports.toString = function(){
-    return "MDR";
-}
-
-exports.post = function(params,callback) {
-    var res;
-    __logger.info('post bear');
-    var model = new Model(); 		// create a new instance of the Bear model
-    model.name = params.name;  // set the bears name (comes from the request)
-
-    // save the bear and check for errors
-    model.save(function(err) {
-        if (err){
-            res = err;
-        }else{
-            __logger.info('Bear created!');
-            res = { message: 'Bear created!' };
-        }
-        callback(res);
-    });
-};
-
-
-exports.getAll = function(params,callback) {
-    __logger.info('getAll bears ');
-    Model.find(function(err, bear) {
-        if (err){
-            res = err;
-        }else{
-            res = bear;
-        }
-        callback(res);
-    });
-};
-
-exports.get = function(params,callback) {
-    __logger.info('get bear : ',params.id);
-    Model.findById(params.id, function(err, bear) {
-        if (err){
-            res = err;
-        }else{
-            res = bear;
-        }
-        callback(res);
-    });
-};
-
-exports.put = function(params,callback) {
-    __logger.info('put bear : ',params.id," : ",params.name);
-        // use our bear model to find the bear we want
-    Model.findById(params.id, function(err, bear) {
-
-        if (err){
-            res = err;
-            callback(res);
-        }else {
-            __logger.info('find');
-            bear.name = params.name; 	// update the bears info
-            __logger.info('change name done');
-            // save the bear
-            bear.save(function (err) {
-                __logger.info('save done');
-                if (err) {
-                    res = err;
-                } else {
-                    res = { message: 'Bear updated!' };
-                }
-                callback(res);
-            });
-        }
+    if(schema)
+    {
+        objectSchema = new Schema(schema);
+    }else{
+        objectSchema = new Schema({
+            name: String,
+            age:String
         });
-    };
+    }
 
-exports.delete = function(params,callback) {
-    __logger.info('delete bear : ',params.id);
-        Model.remove({
-            _id: params.id
-        }, function(err, model) {
-            if (err){
+    ModelObject = mongoose.model(params.name, objectSchema);
+
+
+
+    /**
+     *   Function
+     */
+    this.toString = function () {
+        return nameObject;
+    }
+
+
+
+    this.post = function (params, callback) {
+        var res;
+
+        objectSchema.add({prenom:String});
+        //ModelObject = mongoose.model(nameObject, objectSchema);
+
+        logger.info('post ', nameObject);
+        var Model = new ModelObject(); 		// create a new instance of the Bear Model
+
+        logger.info(params);
+
+
+
+        objectSchema.eachPath(function(value){
+            logger.info('objectSchema.eachPath ', value);
+            if(params[value])
+            {
+                logger.info('objectSchema.eachPath Sur ', value);
+                Model[value] = params[value];
+            }
+        });
+
+
+        // save the bear and check for errors
+        Model.save(function (err) {
+            if (err) {
                 res = err;
-            }else{
-                res = { message: 'Successfully deleted' };
+            } else {
+                logger.info('Bear created!');
+                res = {message: 'Bear created!'};
             }
             callback(res);
         });
+    };
+
+
+    this.getAll = function (params, callback) {
+        logger.info('getAll ', nameObject);
+        ModelObject.find(function (err, bear) {
+            if (err) {
+                res = err;
+            } else {
+                res = bear;
+            }
+            callback(res);
+        });
+    };
+
+    this.get = function (params, callback) {
+        logger.info('get ', nameObject, ' : ', params.id);
+        ModelObject.findById(params.id, function (err, bear) {
+            if (err) {
+                res = err;
+            } else {
+                res = bear;
+            }
+            callback(res);
+        });
+    };
+
+    this.put = function (params, callback) {
+        logger.info('put ' + nameObject + ' : ', params.id, " : ", params.name);
+        // use our bear Model to find the bear we want
+        ModelObject.findById(params.id, function (err, bear) {
+
+            if (err) {
+                res = err;
+                callback(res);
+            } else {
+                logger.info('find');
+                bear.name = params.name; 	// update the bears info
+                logger.info('change name done');
+                // save the bear
+                bear.save(function (err) {
+                    logger.info('save done');
+                    if (err) {
+                        res = err;
+                    } else {
+                        res = {message: 'Bear updated!'};
+                    }
+                    callback(res);
+                });
+            }
+        });
+    };
+
+    this.delete = function (params, callback) {
+        logger.info('delete ' + nameObject + ' : ', params.id);
+        ModelObject.remove({
+            _id: params.id
+        }, function (err) {
+            if (err) {
+                res = err;
+            } else {
+                res = {message: 'Successfully deleted'};
+            }
+            callback(res);
+        });
+    };
 };
+
+
+module.exports = Object;
+
+
 
 

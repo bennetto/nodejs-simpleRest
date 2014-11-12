@@ -3,7 +3,7 @@
  */
 var mongoose = require('mongoose');
 var object = require('Object');
-
+var logger = require("../utils/logger.js");
 
 /**
  * Var
