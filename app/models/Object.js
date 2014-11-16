@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 
 
 var method  = Object.prototype;
-function Object(params,schema) {
+function Object(params,schema,routeObject) {
 
     /*
      Var
@@ -15,24 +15,33 @@ function Object(params,schema) {
     var ModelObject;
     var _self = this;
     var nameObject = params.name;
+    var prefixRoute;
     var objectSchema;
     var isExpose = true;
+    var defaultObject = params.defaultObject;
+    var _routeObject = routeObject;
 
+    if(prefixRoute) {
+        prefixRoute = params.prefixRoute;
+    }else{
+        prefixRoute = "";
+    }
 
     /**
      * Schema
      */
 
-    logger.info('createObject Model ', params.name);
+    logger.info('createObject Model ', nameObject);
+
+    objectSchema = new Schema({
+        name: String,
+        isExpose:Boolean
+    });
 
     if(schema)
     {
-        objectSchema = new Schema(schema);
-    }else{
-        objectSchema = new Schema({
-            name: String,
-            age:String
-        });
+       // _self.addInSchema(schema);
+        objectSchema.add(schema);
     }
 
     ModelObject = mongoose.model(params.name, objectSchema);
@@ -44,65 +53,92 @@ function Object(params,schema) {
      */
     this.toString = function () {
         return nameObject;
+    };
+
+
+    this.addInSchema = function(params){
+        objectSchema.add(params);
+    };
+
+    this.removeInSchema = function(params){
+       // objectSchema.remove(params);
+    };
+
+    this.getRoute = function(){
+        return _routeObject;
     }
 
 
 
+    /*
+    ALL
+     */
+    this.getAll = function (params, callback) {
+        logger.info('getAll ', nameObject);
+        ModelObject.find(function (err, object) {
+            if (err) {
+                res = {error:true,data: err};
+            } else if (object) {
+                res = {success:true,data: object};
+            } else{
+                res = {};
+            }
+            callback(res);
+        });
+    };
+
+    this.deleteAll = function (params, callback) {
+
+    };
+
+    /*
+    Unique
+     */
+
     this.post = function (params, callback) {
         var res;
 
-        objectSchema.add({prenom:String});
-        //ModelObject = mongoose.model(nameObject, objectSchema);
-
         logger.info('post ', nameObject);
-        var Model = new ModelObject(); 		// create a new instance of the Bear Model
-
-        logger.info(params);
-
-
+        var model = new ModelObject(); 		// create a new instance of the object Model
 
         objectSchema.eachPath(function(value){
-            logger.info('objectSchema.eachPath ', value);
+          //  logger.info('objectSchema.eachPath ', value);
             if(params[value])
             {
-                logger.info('objectSchema.eachPath Sur ', value);
-                Model[value] = params[value];
+                model[value] = params[value];
+            }else if(defaultObject && defaultObject[value]){
+                model[value] = defaultObject[value];
             }
         });
 
-
-        // save the bear and check for errors
-        Model.save(function (err) {
+        // save the object and check for errors
+        model.save(function (err) {
             if (err) {
-                res = err;
+                res = {error:true,data: err};
             } else {
-                logger.info('Bear created!');
-                res = {message: 'Bear created!'};
+                if(_self.objectCreated){
+                    _self.objectCreated(model);
+                }
+                logger.info(nameObject,' created!');
+                res = {success:true,data: nameObject+' created!'};
             }
             callback(res);
         });
     };
 
 
-    this.getAll = function (params, callback) {
-        logger.info('getAll ', nameObject);
-        ModelObject.find(function (err, bear) {
-            if (err) {
-                res = err;
-            } else {
-                res = bear;
-            }
-            callback(res);
-        });
-    };
 
     this.get = function (params, callback) {
         logger.info('get ', nameObject, ' : ', params.id);
-        ModelObject.findById(params.id, function (err, bear) {
+        ModelObject.findById(params.id, function (err, object) {
+            logger.info('object ',err," , " ,object);
             if (err) {
-                res = err;
-            } else {
-                res = bear;
+                logger.info('err ', err);
+                res = {error:true,data: err};
+            } else  if (object) {
+                res = {success:true,data: object};
+            } else{
+                res = {};
             }
             callback(res);
         });
@@ -110,23 +146,23 @@ function Object(params,schema) {
 
     this.put = function (params, callback) {
         logger.info('put ' + nameObject + ' : ', params.id, " : ", params.name);
-        // use our bear Model to find the bear we want
-        ModelObject.findById(params.id, function (err, bear) {
+        // use our object Model to find the object we want
+        ModelObject.findById(params.id, function (err, object) {
 
             if (err) {
                 res = err;
                 callback(res);
             } else {
                 logger.info('find');
-                bear.name = params.name; 	// update the bears info
+                object.name = params.name; 	// update the object info
                 logger.info('change name done');
-                // save the bear
-                bear.save(function (err) {
+                // save the object
+                object.save(function (err) {
                     logger.info('save done');
                     if (err) {
-                        res = err;
+                        res = {error:true,data: err};
                     } else {
-                        res = {message: 'Bear updated!'};
+                        res = {success:true,data: 'Object updated!'};
                     }
                     callback(res);
                 });
@@ -140,18 +176,74 @@ function Object(params,schema) {
             _id: params.id
         }, function (err) {
             if (err) {
-                res = err;
+                res = {error:true,data: err};
             } else {
-                res = {message: 'Successfully deleted'};
+                res = {success:true,data: 'Successfully deleted'};
             }
             callback(res);
         });
     };
-};
+
+/*
+  _____             _
+ |  __ \           | |
+ | |__) |___  _   _| |_ ___
+ |  _  // _ \| | | | __/ _ \
+ | | \ \ (_) | |_| | ||  __/
+ |_|  \_\___/ \__,_|\__\___|
+ */
+
+// middleware to use for all requests
+    routeObject.use(function(req, res, next) {
+        // do logging
+        logger.info('');
+        logger.info('/* request begin ',nameObject,'*/');
+
+        //todo : add securité
+
+        next(); // make sure we go to the next routes and don't stop here
+    });
+
+
+    routeObject.route(prefixRoute+'/')
+        .get(function(req, res) {
+            logger.info('get all ',nameObject);
+           _self.getAll(undefined,function(result){
+                res.json(result);
+            });
+            // });
+        })
+        .post(function(req, res) {
+            logger.info('add new ',nameObject,' : ');
+            _self.post(req.body,function(result){
+                res.json(result);
+            });
+        });
+
+
+// more routes for our API will happen here
+    routeObject.route(prefixRoute+'/:id')
+        // update
+        .put(function(req, res) {
+            logger.info('put : ',req.params.userId);
+            var result = _self.put({id:req.params.id,name:req.body.name},function(result){
+                res.json(result);
+            });
+        })
+// get
+        .get(function(req, res) {
+            logger.info('get : ',req.params.userId);
+            var result = _self.get({id:req.params.id},function(result){
+                res.json(result);
+            });
+        })
+        .delete(function(req, res) {
+            logger.info('remove : ',req.params.userId);
+            var result = _self.delete({id:req.params.id},function(result){
+                res.json(result);
+            });
+        });
+}
 
 
 module.exports = Object;
-
-
-
-
