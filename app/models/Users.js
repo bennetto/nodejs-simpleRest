@@ -2,8 +2,10 @@
  * REQUIRE
  */
 var mongoose = require('mongoose');
+var express = require('express');
 var object = require('./Object');
 var logger = require("../utils/logger.js");
+
 
 var Schema  = mongoose.Schema;
 function Users(prefix) {
@@ -15,6 +17,9 @@ function Users(prefix) {
             password:""
         }
     };
+    //var routeObject = express.Router();
+    //global.app.use(prefix, routeObject);
+
     object.call(this, params, userSchema);
 
     var _self = this;

@@ -9,30 +9,30 @@ var Schema = mongoose.Schema;
 
 var method  = Object.prototype;
 function Object(params,schema) {
-
+    logger.info('begin createObject Model ');
     /*
      Var
      */
     var ModelObject;
     var _self = this;
     var nameObject = params.name;
-    var prefixRoute;
+    var _prefixRoute;
     var objectSchema;
     var isExpose = true;
     var defaultObject = params.defaultObject;
-    var _routeObject = routeObject;
 
-    if(prefixRoute) {
-        prefixRoute = params.prefixRoute;
+
+    if(params.prefixRoute) {
+        _prefixRoute = params.prefixRoute;
     }else{
-        prefixRoute = "";
+        _prefixRoute = "";
     }
 
     /**
      * Schema
      */
 
-    logger.info('createObject Model ', nameObject," , prefix:",prefixRoute);
+    logger.info('createObject Model ', nameObject," , prefix:",_prefixRoute);
 
     objectSchema = new Schema({
         name: String,
@@ -136,7 +136,7 @@ function Object(params,schema) {
     this.get = function (params, callback) {
         logger.info('get ', nameObject, ' : ', params.id);
         ModelObject.findById(params.id, function (err, object) {
-            logger.info('object ',err," , " ,object);
+
             if (err) {
                 logger.info('err ', err);
                 res = {error:true,data: err};
@@ -147,20 +147,50 @@ function Object(params,schema) {
             }
             callback(res);
         });
+        ModelObject.find
     };
+
+    this.getByName = function (params, callback) {
+        logger.info('get by name', nameObject, ' : ', params.name);
+        ModelObject.find({name:params.name}, function (err, object) {
+
+            if (err) {
+                logger.info('err ', err);
+                res = {error:true,data: err};
+            } else  if (object) {
+                res = {success:true,data: object};
+            } else{
+                res = {};
+            }
+            callback(res);
+        });
+        ModelObject.find
+    };
+
 
     this.put = function (params, callback) {
         logger.info('put ' + nameObject + ' : ', params.id, " : ", params.name);
         // use our object Model to find the object we want
         ModelObject.findById(params.id, function (err, object) {
 
+            var args = params.args;
+
             if (err) {
                 res = err;
                 callback(res);
             } else {
                 logger.info('find');
-                object.name = params.name; 	// update the object info
-                logger.info('change name done');
+
+                objectSchema.eachPath(function(value){
+                    //  logger.info('objectSchema.eachPath ', value);
+                    if(params[value])
+                    {
+                        object[value] = params[value];
+                    }else if(defaultObject && defaultObject[value]){
+                        object[value] = defaultObject[value];
+                    }
+                });
+
                 // save the object
                 object.save(function (err) {
                     logger.info('save done');
@@ -198,15 +228,17 @@ function Object(params,schema) {
  |_|  \_\___/ \__,_|\__\___|
  */
 
-    logger.info("routeObject");
-    var routeObject = express.Router();
+    logger.info("routeObject : ",_prefixRoute);
+
+    _routeObject = express.Router();
 
 
 // middleware to use for all requests
-    routeObject.use(function(req, res, next) {
+    _routeObject.use(function(req, res, next) {
         // do logging
         logger.info('');
         logger.info('/* request begin ',nameObject,'*/');
+
 
         //todo : add securité
 
@@ -214,7 +246,7 @@ function Object(params,schema) {
     });
 
 
-    routeObject.route(prefixRoute)
+    _routeObject.route("/")
         .get(function(req, res) {
             logger.info('get all ',nameObject);
            _self.getAll(undefined,function(result){
@@ -227,15 +259,26 @@ function Object(params,schema) {
             _self.post(req.body,function(result){
                 res.json(result);
             });
+        })
+        .put(function(req, res) {
+           // logger.info('add new ',nameObject,' : ');
+
+
+        })
+        .delete(function(req, res) {
+            // logger.info('add new ',nameObject,' : ');
+
+
         });
 
 
 // more routes for our API will happen here
-    routeObject.route(prefixRoute+'/:id')
+    _routeObject.route('/:id')
         // update
         .put(function(req, res) {
             logger.info('put : ',req.params.id);
-            var result = _self.put({id:req.params.id,name:req.body.name},function(result){
+            var result = _self.put({id:req.params.id,args:req.body},function(result){
+
                 res.json(result);
             });
         })
@@ -243,7 +286,15 @@ function Object(params,schema) {
         .get(function(req, res) {
             logger.info('get : ',req.params.id);
             var result = _self.get({id:req.params.id},function(result){
-                res.json(result);
+                if(result.error)
+                {
+                    var result = _self.getByName({name:req.params.id},function(result){
+                        res.json(result);
+                    });
+
+                }else if(result.success){
+                    res.json(result);
+                }
             });
         })
         .delete(function(req, res) {
@@ -253,8 +304,9 @@ function Object(params,schema) {
             });
         });
 
-    global.app.use(prefixRoute, routeObject);
+    global.app.use(_prefixRoute, _routeObject);
 }
 
 
 module.exports = Object;
+

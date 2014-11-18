@@ -2,9 +2,9 @@
  * REQUIRE
  */
 var mongoose = require('mongoose');
-var object = require('./Object');
+var Object = require('./Object');
 var logger = require("../utils/logger.js");
-
+var express = require('express');
 
 var Schema  = mongoose.Schema;
 function Apps(prefix) {
@@ -12,7 +12,9 @@ function Apps(prefix) {
         listObjects:[]
     };
     var params = {name:"apps",prefixRoute:prefix};
-    object.call(this, params, appSchema);
+
+
+    Object.call(this, params, appSchema);
 
     var _self = this;
     var listObjects = [];
@@ -20,10 +22,10 @@ function Apps(prefix) {
 
     this.objectCreated = function(model){
         var name = model.name;
-        listObjects[name] = new Object({name:name});
+        //listObjects[name] = new Object({name:name});
 
-
-        var _users = new Object({name:name,prefixRoute: prefix+'/'+_self.getName()+'/'+name},{});
+        logger.info("Router ",name,' ', prefix+'/'+name+'/objects');
+        new Object({name:name,prefixRoute: prefix+'/'+name+'/objects'},{});
 
     };
 
@@ -34,8 +36,9 @@ function Apps(prefix) {
         if(result.success && result.data){
             result.data.forEach(function(object){
                 var name = object.name;
-                logger.info("Router ",name,' ', prefix+'/'+_self.getName()+'/'+name);
-                var object= new Object({name:name,prefixRoute: prefix+'/'+_self.getName()+'/'+name},{});
+                logger.info("Router ",name,' ', prefix+'/'+name+'/objects');
+                 new Object({name:name,prefixRoute: prefix+'/'+name+'/objects'},{});
+
             });
         }
     });
