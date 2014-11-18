@@ -2,18 +2,17 @@
  * REQUIRE
  */
 var mongoose = require('mongoose');
-var express = require('express');
 var object = require('./Object');
 var logger = require("../utils/logger.js");
 
 
 var Schema  = mongoose.Schema;
-function Apps(prefix,route) {
+function Apps(prefix) {
     var appSchema   = {
         listObjects:[]
     };
-    var params = {name:"apps",prefix:prefix};
-    object.call(this, params, appSchema,route);
+    var params = {name:"apps",prefixRoute:prefix};
+    object.call(this, params, appSchema);
 
     var _self = this;
     var listObjects = [];
@@ -23,12 +22,10 @@ function Apps(prefix,route) {
         var name = model.name;
         listObjects[name] = new Object({name:name});
 
-        logger.info("RouterUser");
-        var routerObject = express.Router();
-        var _users = new Object({name:name,prefix: prefix+'/'+name},{},routerObject);
-        global.app.use(prefix+'/'+name, routerObject);
 
-    }
+        var _users = new Object({name:name,prefixRoute: prefix+'/'+_self.getName()+'/'+name},{});
+
+    };
 
 
     //Init
@@ -37,11 +34,8 @@ function Apps(prefix,route) {
         if(result.success && result.data){
             result.data.forEach(function(object){
                 var name = object.name;
-                logger.info("Router ",name,' ',prefix+'/'+name);
-
-                var routerObject = express.Router();
-                var object= new Object({name:name,prefix: prefix+'/'+name},{},routerObject);
-                global.app.use(prefix+'/'+name, routerObject);
+                logger.info("Router ",name,' ', prefix+'/'+_self.getName()+'/'+name);
+                var object= new Object({name:name,prefixRoute: prefix+'/'+_self.getName()+'/'+name},{});
             });
         }
     });

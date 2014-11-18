@@ -3,11 +3,12 @@
  */
 var mongoose = require('mongoose');
 var logger = require("../utils/logger.js");
+var express = require('express');
 var Schema = mongoose.Schema;
 
 
 var method  = Object.prototype;
-function Object(params,schema,routeObject) {
+function Object(params,schema) {
 
     /*
      Var
@@ -31,7 +32,7 @@ function Object(params,schema,routeObject) {
      * Schema
      */
 
-    logger.info('createObject Model ', nameObject);
+    logger.info('createObject Model ', nameObject," , prefix:",prefixRoute);
 
     objectSchema = new Schema({
         name: String,
@@ -55,6 +56,10 @@ function Object(params,schema,routeObject) {
         return nameObject;
     };
 
+
+    this.getName = function(){
+        return nameObject;
+    }
 
     this.addInSchema = function(params){
         objectSchema.add(params);
@@ -193,6 +198,10 @@ function Object(params,schema,routeObject) {
  |_|  \_\___/ \__,_|\__\___|
  */
 
+    logger.info("routeObject");
+    var routeObject = express.Router();
+
+
 // middleware to use for all requests
     routeObject.use(function(req, res, next) {
         // do logging
@@ -205,7 +214,7 @@ function Object(params,schema,routeObject) {
     });
 
 
-    routeObject.route(prefixRoute+'/')
+    routeObject.route(prefixRoute)
         .get(function(req, res) {
             logger.info('get all ',nameObject);
            _self.getAll(undefined,function(result){
@@ -225,24 +234,26 @@ function Object(params,schema,routeObject) {
     routeObject.route(prefixRoute+'/:id')
         // update
         .put(function(req, res) {
-            logger.info('put : ',req.params.userId);
+            logger.info('put : ',req.params.id);
             var result = _self.put({id:req.params.id,name:req.body.name},function(result){
                 res.json(result);
             });
         })
 // get
         .get(function(req, res) {
-            logger.info('get : ',req.params.userId);
+            logger.info('get : ',req.params.id);
             var result = _self.get({id:req.params.id},function(result){
                 res.json(result);
             });
         })
         .delete(function(req, res) {
-            logger.info('remove : ',req.params.userId);
+            logger.info('remove : ',req.params.id);
             var result = _self.delete({id:req.params.id},function(result){
                 res.json(result);
             });
         });
+
+    global.app.use(prefixRoute, routeObject);
 }
 
 

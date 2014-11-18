@@ -26,26 +26,9 @@ var Apps = require('./app/models/Apps');
 logger.info("Require finished");
 global.app = app;
 
-/*
-var objects = {};
-objects["bears"] = new Object({name:"bears"});
-objects["beers"] = new Object({name:"beers"});
+var _users = new Users('/users');
 
-logger.info('objects : ',objects["bears"].toString());
-*/
-
-logger.info("RouterUser");
-var routerUser = express.Router();
-var _users = new Users('/users',routerUser);
-app.use('/users', routerUser);
-
-
-logger.info("RouterApp");
-var routerApp = express.Router();
-var _apps = new Apps('/apps',routerApp);
-app.use('/apps', routerApp);
-
-
+var _apps = new Apps('/apps');
 
 
 // =============================================================================
