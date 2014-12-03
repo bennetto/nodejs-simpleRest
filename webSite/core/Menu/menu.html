@@ -1,0 +1,9 @@
+<link rel="stylesheet" href="./core/Menu/menu.css">
+<div ng-controller="MenuCtrl">
+  <div class="menu-title"><p>List des Apps</p></div>
+  <div class="listApps">
+    <div class="menu-app" ng-repeat="app in listApps" ng-click="onClickApp(app)">
+        <p>{{app.name}}</p>
+    </div>
+  </div>
+</div>
