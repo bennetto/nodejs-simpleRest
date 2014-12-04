@@ -2,8 +2,16 @@
 <div ng-controller="MenuCtrl">
   <div class="menu-title"><p>List des Apps</p></div>
   <div class="listApps">
-    <div class="menu-app" ng-repeat="app in listApps" ng-click="onClickApp(app)">
+    <div  ng-repeat="app in listApps" ng-click="onClickApp(app)">
+      <div class="menu-app" >
         <p>{{app.name}}</p>
+      </div>
+      <div  class="menu-table" ng-repeat="table in listTables" >
+          <p>{{table.name}}</p>
+      </div>
+
+    </div>
+
     </div>
   </div>
 </div>

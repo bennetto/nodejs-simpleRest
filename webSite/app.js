@@ -4,6 +4,9 @@ console.log("create angular app");
 //create a module myApp
 var myApp = angular.module('myApp', ['ngRoute','ngResource']);
 
+//  #/item/{{item.id}}/foo
+//  $location.path('/sampleurl', false);
+
 //Now Configure  our  routing
 myApp.config(function ($routeProvider, $locationProvider) {
     $routeProvider
@@ -15,36 +18,29 @@ myApp.config(function ($routeProvider, $locationProvider) {
     })
      // if not match with any route config then send to home page
 
-    /* .otherwise({
-        redirectTo: '/home'
-      });*/
+     .otherwise({
+        redirectTo: '/'
+      });
 });
 
 /*Service */
-  myApp.factory('listApps',function($resource){
+  myApp.factory('apps',function($resource){
     return $resource('http://server.bonnetto.fr:8080/apps', {}, {
       query: {method:'GET', params:{}, isArray:true}
     });
   });
 
 
-  myApp.factory('listTables',
+  myApp.factory('tables',
   function($resource){
-    return $resource('http://server.bonnetto.fr:8080/apps/:appName/objects', {}, {
-      query: {method:'GET', params:{appName:'empty'}, isArray:true}
-    });
-  });
-
-  myApp.factory('shemas',
-  function($resource){
-    return $resource('http://server.bonnetto.fr:8080/apps/:appName/shemas', {}, {
+    return $resource('http://server.bonnetto.fr:8080/apps/:appName/tables', {}, {
       query: {method:'GET', params:{appName:'empty'}, isArray:true}
     });
   });
 
 myApp.factory('objects',
   function($resource){
-    return $resource('http://server.bonnetto.fr:8080/apps/:appName/objects/:id', {}, {
+    return $resource('http://server.bonnetto.fr:8080/apps/:appName/tables/:tableName/objects', {}, {
       query: {method:'GET', params:{appName:'empty'}, isArray:true}
     });
   });
@@ -67,18 +63,21 @@ myApp.factory('objects',
 
   });
 
-myApp.controller('MenuCtrl', function($scope,$rootScope,listApps) {
-  listApps.get({}, function(apps) {
-    $scope.listApps = apps.data;
+myApp.controller('MenuCtrl', function($scope,$rootScope,apps,tables) {
+  apps.get({}, function(listApps) {
+    $scope.listApps = listApps.data;
   });
 
   $scope.onClickApp = function(app){
     $rootScope.$broadcast('appSelected', app);
+     tables.get({appName:app.name}, function(listTables) {
+        $scope.listTables = listTables.data;
+      });
   };
 
 });
 
-myApp.controller('ObjectsCtrl', function($scope,listTables) {
+myApp.controller('ObjectsCtrl', function($scope,tables) {
   $scope.test = 'begin!';
   $scope.appSelected = false;
    $scope.$on('appSelected', function(event, data) {
@@ -86,9 +85,9 @@ myApp.controller('ObjectsCtrl', function($scope,listTables) {
      {
       $scope.appSelected = true;
       $scope.app = data;
-      $scope.listObjects = [];
-      listTables.get({appName:data.name}, function(listObjects) {
-        $scope.listObjects = listObjects.data;
+      $scope.listTables = [];
+      tables.get({appName:data.name}, function(listTables) {
+        $scope.listTables = listTables.data;
       });
      }else{
       $scope.appSelected = false;

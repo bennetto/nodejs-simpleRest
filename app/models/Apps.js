@@ -2,7 +2,8 @@
  * REQUIRE
  */
 var mongoose = require('mongoose');
-var Object = require('./Tables');
+var Object = require('./Object');
+var Tables = require('./Tables');
 var logger = require("../utils/logger.js");
 var express = require('express');
 

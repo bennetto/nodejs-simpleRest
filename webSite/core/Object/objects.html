@@ -3,7 +3,7 @@
   <div ng-hide="appSelected" class="default-content"><p>Sélectionner une application.</p></div>
   <div ng-show="appSelected" >
     <div class="title"><p>{{app.name}}</p></div>
-    <div ng-repeat="object in listObjects">
+    <div ng-repeat="object in listTables">
       <p>{{object.id}}</p>
       <p>{{object.name}}</p>
     </div>
