@@ -2,30 +2,38 @@
  * REQUIRE
  */
 var mongoose = require('mongoose');
-var Object = require('./Tables');
+var Object = require('./Object');
 var logger = require("../utils/logger.js");
 var express = require('express');
 
 var Schema  = mongoose.Schema;
-function Apps(prefix) {
-    var appSchema   = {
-        listTables:[]
+function Tables(params) {
+
+    var prefix= "";
+    if(params.prefixRoute) {
+        prefix = params.prefixRoute;
+    }
+    var _name = params.name;
+
+
+    var tableSchema   = {
+        listObjects:[]
     };
-    var params = {name:"apps",prefixRoute:prefix};
+    var params = {name:_name,prefixRoute:prefix};
 
 
-    Object.call(this, params, appSchema);
+    Object.call(this, params, tableSchema); //Heritage
 
     var _self = this;
-    var listTables = [];
+    var listObjects = [];
 
 
     this.objectCreated = function(model){
         var name = model.name;
         //listObjects[name] = new Object({name:name});
 
-        logger.info("Router ",name,' ', prefix+'/'+name+'/tables');
-        new Tables({name:name,prefixRoute: prefix+'/'+name+'/tables'},{});
+        logger.info("Router ",name,' ', prefix+'/'+name+'/objects');
+        new Object({name:name,prefixRoute: prefix+'/'+name+'/objects'},{});
 
     };
 
@@ -36,9 +44,8 @@ function Apps(prefix) {
         if(result.success && result.data){
             result.data.forEach(function(object){
                 var name = object.name;
-                logger.info("Router ",name,' ', prefix+'/'+name+'/tables');
-                 new Tables({name:name,prefixRoute: prefix+'/'+name+'/tables'},{});
-
+                logger.info("Router ",name,' ', prefix+'/'+name+'/objects');
+                 new Object({name:name,prefixRoute: prefix+'/'+name+'/objects'},{});
             });
         }
     });
