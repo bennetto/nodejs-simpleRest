@@ -2,10 +2,14 @@
 
 console.log("create angular app");
 //create a module myApp
-var myApp = angular.module('myApp', ['ngRoute','ngResource']);
+var myApp = angular.module('myApp', ['myApp.table','myApp.menu','myApp.header','ngRoute','ngResource']);
 
 //  #/item/{{item.id}}/foo
 //  $location.path('/sampleurl', false);
+
+// URL: http://server.com/index.html#/Chapter/1/Section/2?search=moby
+// Route: /Chapter/:chapterId/Section/:sectionId
+
 
 //Now Configure  our  routing
 myApp.config(function ($routeProvider, $locationProvider) {
@@ -22,6 +26,16 @@ myApp.config(function ($routeProvider, $locationProvider) {
         redirectTo: '/'
       });
 });
+
+/*.when('/:idApp',
+    {
+        controller: 'RouteCtrl',
+        templateUrl: 'core/Home/home.html'
+    }.when('/:idApp/:idTable',
+    {
+        controller: 'RouteCtrl',
+        templateUrl: 'core/Home/home.html'
+    })*/
 
 /*Service */
   myApp.factory('apps',function($resource){
@@ -56,47 +70,9 @@ myApp.factory('objects',
      "home":"core/Home/home.html",
      "header":"core/Header/header.html",
      "menu":"core/Menu/menu.html",
-     "objects":"core/Object/objects.html"
+     "table":"core/Table/table.html",
+     "app":"core/App/app.html"
    }
-
-   /** now after this ng-include in uirouter.html set and take template from their respective path **/
-
   });
 
-myApp.controller('MenuCtrl', function($scope,$rootScope,apps,tables) {
-  apps.get({}, function(listApps) {
-    $scope.listApps = listApps.data;
-  });
 
-  $scope.onClickApp = function(app){
-    $rootScope.$broadcast('appSelected', app);
-     tables.get({appName:app.name}, function(listTables) {
-        $scope.listTables = listTables.data;
-      });
-  };
-
-});
-
-myApp.controller('ObjectsCtrl', function($scope,tables) {
-  $scope.test = 'begin!';
-  $scope.appSelected = false;
-   $scope.$on('appSelected', function(event, data) {
-     if(data)
-     {
-      $scope.appSelected = true;
-      $scope.app = data;
-      $scope.listTables = [];
-      tables.get({appName:data.name}, function(listTables) {
-        $scope.listTables = listTables.data;
-      });
-     }else{
-      $scope.appSelected = false;
-      $scope.app = undefined;
-     }
-   });
-});
-
-
-myApp.controller('HeaderCtrl', ['$scope', function($scope) {
-  $scope.test = 'head!';
-}]);
