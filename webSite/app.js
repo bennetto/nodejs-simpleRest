@@ -2,7 +2,7 @@
 
 console.log("create angular app");
 //create a module myApp
-var myApp = angular.module('myApp', ['myApp.table','myApp.menu','myApp.header','ngRoute','ngResource']);
+var myApp = angular.module('myApp', ['myApp.table','myApp.menu','myApp.header','ngRoute','ngResource','ui.router']);
 
 //  #/item/{{item.id}}/foo
 //  $location.path('/sampleurl', false);
@@ -12,19 +12,35 @@ var myApp = angular.module('myApp', ['myApp.table','myApp.menu','myApp.header','
 
 
 //Now Configure  our  routing
-myApp.config(function ($routeProvider, $locationProvider) {
-    $routeProvider
-    // set route for the index page
-    .when('/',
-    {
-        controller: 'RouteCtrl',
-        templateUrl: 'core/Home/home.html'
+myApp.config(function($stateProvider, $urlRouterProvider) {
+  //
+  // For any unmatched url, redirect to /state1
+  $urlRouterProvider.otherwise("/state1");
+  //
+  // Now set up the states
+  $stateProvider
+    .state('state1', {
+      url: "/state1",
+      templateUrl: "./core/App/app.html"
     })
-     // if not match with any route config then send to home page
-
-     .otherwise({
-        redirectTo: '/'
-      });
+    .state('state1.list', {
+      url: "/list",
+      templateUrl: "./core/App/app.html",
+      controller: function($scope) {
+        $scope.items = ["A", "List", "Of", "Items"];
+      }
+    })
+    .state('state2', {
+      url: "/state2",
+      templateUrl: "./core/App/app.html"
+    })
+    .state('state2.list', {
+      url: "/list",
+      templateUrl: "./core/App/app.html",
+      controller: function($scope) {
+        $scope.things = ["A", "Set", "Of", "Things"];
+      }
+    });
 });
 
 /*.when('/:idApp',
@@ -66,7 +82,7 @@ myApp.factory('objects',
   myApp.controller('RouteCtrl', function($scope) {
 
    /** create $scope.template **/
-   $scope.template={
+   $scope.template = {
      "home":"core/Home/home.html",
      "header":"core/Header/header.html",
      "menu":"core/Menu/menu.html",

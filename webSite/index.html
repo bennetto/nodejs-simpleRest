@@ -14,20 +14,24 @@
     <script src='lib/angular/angular.js'></script>
     <script src="lib/angular/angular-route.js"></script>
     <script src="lib/angular/angular-resource.js"></script>
+    <script src="lib/angular/angular-ui-router.js"></script>
 
     <script src="core/Header/header.js"></script>
      <script src="core/Menu/menu.js"></script>
-      <script src="core/Table/table.js"></script>
+    <script src="core/Table/table.js"></script>
     <script src="app.js"></script>
-
-
 
 
 </head>
 <body ng-app="myApp">
 
-  <div ng-view class="view">
-    </div>
+   <div class="home">
+     <div class="header" ng-include='template.header'></div>
+     <div class="content">
+        <div class="menu" ng-include='template.menu'></div>
+        <div ui-view="viewA"></div>
+      </div>
+</div>
 
 
 </body>
